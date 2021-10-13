@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+
+{% block body %}
+    <div class="transparent-block " >
+    <h1 class="text-responsive-huge">So Nice To See You</h1>
+        <form action="/login" method="post">
+               <button  type="submit" class="btn p-3 mt-4 mb-4 text-focus-in">Connect to Spotify</button>
+        </form>
+
+        <h1 class="text-1 alert-danger m-2">{{error}}</h1>
+    </div>
+
+{% endblock %}

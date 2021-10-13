@@ -1,0 +1,24 @@
+{% extends "profile.html" %}
+
+{% block body %} <div class="container-md">
+</div>
+    <div class="row justify-content-center mt-4 " >
+    {% for song in recommendations %}
+        <div class="col-12 col-md-4 colored-block-sm">
+  <dl class="row">
+          <img class="thumbnail p-0 pb-1" src="{{ song.image }}">
+
+    <dt class="col-3" style="text-align: left">Song</dt>
+    <dd class="col-9" style="text-align: right">{{ song.name }}</dd>
+    <dt class="col-3" style="text-align: left">Artist</dt>
+    <dd class="col-9" style="text-align: right">{{ song.artist }}</dd>
+    <dt class="col-3" style="text-align: left">Album</dt>
+    <dd class="col-9" style="text-align: right">{{ song.album }}</dd>
+  </dl>
+  <a href="{{ song.link }}" target="_blank" ><button type="button" class="btn btn-outline-success" >Listen On Spotify</button></a>
+</div>
+
+    {% endfor %}
+
+
+</div>{% endblock %}

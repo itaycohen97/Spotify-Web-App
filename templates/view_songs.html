@@ -1,0 +1,44 @@
+{% extends "profile.html" %}
+
+{% block body %}
+        <div class="justify-content-center text-center m-5">
+            <h1 class="text-3  text-white">{{ headline }}</h1>
+        {% if playlist_url %}
+            <a class="m-2" href="/makeplaylist"><button type="button" class="btn btn-outline-success" >Add Playlist To Spotify</button></a>
+        {% endif %}
+        {% if success %}
+            <h4 class="text-success">{{ success }}</h4>
+        {% endif %}
+    </div>
+    </div>
+<div class="container-lg colored-block m-auto p-2">
+<table class="table table-dark table-striped bg-transparent">
+  <thead>
+    <tr>
+      <th scope="col">Song</th>
+      <th scope="col">Artist</th>
+      <th scope="col">Album</th>
+      <th class="d-none d-md-table-cell" scope="col">Popularity</th>
+      <th class="d-none d-md-table-cell" scope="col"></th>
+      <th scope="col"></th>
+
+    </tr>
+  </thead>
+  <tbody>
+  {% for song in songlist %}
+    <tr>
+      <th scope="row">{{ song.name }}</th>
+      <td>{{ song.artist }}</td>
+      <td>{{ song.album }}</td>
+      <td class="d-none d-md-table-cell">{{ song.popularity }}</td>
+      <td class="d-none d-md-table-cell"><img class="thumbnail" src="{{ song.image }}" ></td>
+        <td><a class="playbtn" target="_blank" href="{{ song.link }}"><span class="material-icons-outlined">play_arrow</span></a></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+
+
+
+</div>{% endblock %}

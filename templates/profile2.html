@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+
+{% block profile %}
+
+</nav>
+    <nav class="navbar fixed-top navbar-light justify-content-end m-2">
+            <muted class="float-end"><b>Now Playing:</b><br>All I Ever Wanted<br>Yebba</muted>
+            <button onclick={{ skip }} class="text-0 d-inline-block ms-2 btn skipbtn">Skip Song</button>
+    </nav>
+
+    <div id="Sidenav" class="d-flex flex-column flex-shrink-0 sidenav" style="width: 0px;">
+    <div class="mb-auto">
+          <a href="javascript:void(0)" class="closebtn" onclick="toggleNav()">×</a>
+          <a href="/topartists">Top Artist</a>
+          <a href="/toptracks">Top Tracks</a>
+          <a href="/lastsaved">Last Saved</a>
+          <a class="disabled" href="#">Player</a>
+          <a href="/recommend">Make A Recommendation</a>
+    </div>
+
+            <div>
+                <muted>Now Playing:</muted>
+            <p class="text-1 ms-5 d-block text-white">All I Ever Wanted<br>Yebba</p>
+
+            <button onclick="{skip}" class="text-0 d-inline-block ms-5 btn skipbtn">Skip Song</button>
+            </div>
+
+
+        <hr class="bg-dark">
+    <div class="dropdown" id="usermenutoggle">
+      <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle">
+                  <img src="https://i.scdn.co/image/ab6775700000ee859bcdfe103aed2de2e665cb93" class="facepic p-0 " alt="User Image">
+        <strong class="ps-4 pb-2">Itay Cohen</strong>
+      </a>
+      <ul class="dropdown-menu dropdown-menu-dark text-small shadow" id="usermenu" style="display: none; left: 30px;bottom: 70px">
+        <li><a class="dropdown-item text-1" href="/logout">Sign out</a></li>
+      </ul>
+    </div>
+</div>
+<!-- Use any element to open the sidenav -->
+<span class="d-block ms-4 mt-2 mb-5" style="font-size:30px;cursor:pointer;color: #1db954
+" onclick="toggleNav()">☰ Menu</span>
+{% endblock %}

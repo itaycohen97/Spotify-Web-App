@@ -1,0 +1,21 @@
+{% extends "profile.html" %}
+
+{% block body %}
+        <div class="m-auto justify-content-center text-center">
+            <h1 class="text-3 m-5 text-white">{{ headline }}</h1>
+
+    </div>
+    </div>
+    <div class="row justify-content-center">
+    {% for artist in artists %}
+             <div class="col-5 col-md-2 colored-block-sm">
+      <img class="p-0 pb-1 img-fluid" src="{{ artist.image }}">
+         <p class="text-2 m-0">{{ artist.name }}</p>
+         <p class="text-0 m-2">Popularity: {{ artist.popularity }}</p>
+  <a href="{{ artist.link }}" target="_blank" ><button type="button" class="btn btn-outline-success" >Listen On Spotify</button></a>
+</div>
+    {% endfor %}
+    </div>
+
+
+</div>{% endblock %}

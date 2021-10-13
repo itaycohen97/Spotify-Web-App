@@ -1,0 +1,39 @@
+{% extends "profile.html" %}
+{% block body %}
+    <div class="row justify-content-center">
+    <div class="col-10 p-5 colored-block form-group">
+   <div class="mb-5">
+      <h1 class="text-3">Let me Find You Some New Music</h1>
+      <h1 class="text-1">Please Help me with your preferences</h1>
+   </div>
+   <form action="/recommend" method="post" >
+      <div class="row text-2">
+         <div class="col-12 col-md-4">
+            <label class="form-label">Popularity</label>
+            <input type="range" class="form-range" min="20" max="80" value="0" name="popularity">
+         </div>
+         <div class="col-12 col-md-4">
+            <label class="form-label ">Danceability</label>
+            <input type="range" class="form-range" min="0.2" max="0.8" step="0.01" value="0.1" name="danceability">
+         </div>
+         <div class="col-12 col-md-4">
+            <label class="form-label">Energy</label>
+            <input type="range" class="form-range" min="0.2" max="0.8" step="0.01" value="0.1" name="energy">
+         </div>
+      </div>
+      <h1 class="text-2 mt-4">Select Mood</h1>
+      <div class="row" STYLE="text-align: left">
+          <select class="form-select" name="genres" aria-label="Default select example">
+         {% for item in genre %}
+             <option name="genres" value="{{ item }}">{{ item }}</option>
+         {% endfor %}
+          </select>
+
+      </div>
+      <br>
+      <button type="submit" class="skipbtn p-3 m-auto mt-4 ">Submit</button>
+   </form>
+   <h1 class="text-1 alert-danger m-2">{{error}}</h1>
+</div>
+    </div>
+{% endblock %}
