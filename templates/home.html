@@ -12,10 +12,9 @@
        {% if user.current_song %}
    <div class="text-center m-2 text-focus-in-1s">
             <p class="mt-5" id="songname" style="color: #1db954"><b>Now Playing:</b><br>{{ user.current_song.name }}<br>{{ user.current_song.artist }}</p>
-            <button id="skip_btn" class="text-0 d-inline-block m-2  btn skipbtn">Skip Song</button>
+            <a href="/skip"><button id="skip_btn" class="text-0 d-inline-block m-2 btn skipbtn">Skip Song</button></a>
     </div>
        {% endif %}
 
 </div>
-    <p style="display: none" id="token">{{ token }}</p>
 {% endblock %}

@@ -147,6 +147,8 @@ class SpotifyApi(object):
     def skip_to_next_song(self):
         request = requests.post("https://api.spotify.com/v1/me/player/next",
                                 headers=self.header)
+        self.recently_played()
+        
 
     def get_top_tracks(self):
         request = requests.get("https://api.spotify.com/v1/me/top/tracks?time_range=medium_term&limit=20&offset=0",

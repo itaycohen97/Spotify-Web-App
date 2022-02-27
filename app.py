@@ -17,7 +17,7 @@ Session(app)
 def home(error=""):
     if 'user' in session:
         session['user'].recently_played()
-        return render_template("home.html", user=session['user'].user, token=session['user'].access_token, animations=True)
+        return render_template("home.html", user=session['user'].user, animations=True)
     return render_template("landing.html", error=error)
 
 
@@ -64,7 +64,7 @@ def logged_in():
 @app.route('/skip')
 def skip():
     session['user'].skip_to_next_song()
-    return render_template("home.html", user=session['user'].user, token=session['user'].access_token, animations=False)
+    return render_template("home.html", user=session['user'].user, animations=False)
 
 
 @app.route('/logout')
