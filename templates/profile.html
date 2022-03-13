@@ -1,35 +1,53 @@
-{% extends "layout.html" %}
+{% extends "layout.html" %} {% block profile %}
+<div id="Sidenav" class="d-flex flex-column flex-shrink-0 sidenav">
+  <div class="mb-auto">
+    <a href="javascript:void(0)" class="closebtn" onclick="toggleNav()"
+      >&times;</a
+    >
+    <a href="/topartists">Top Artist</a>
+    <a href="/toptracks">Top Tracks</a>
+    <a href="/lastsaved">Last Saved</a>
+    <a href="/recommend">Make A Recommendation</a>
+  </div>
+  {# {% if user.current_song %}#} {#
+  <div>
+    #} {# <muted>Now Playing:</muted>#} {#
+    <p id="menusong" class="text-1 ms-5 d-block text-white">
+      {{ user.current_song.name }}<br />{{ user.current_song.artist }}
+    </p>
+    #} {##} {#
+    <button
+      onclick="skip_song()"
+      class="text-0 d-inline-block ms-5 btn skipbtn"
+    >
+      Skip Song</button
+    >#} {#
+  </div>
+  #} {# {% endif %}#}
 
-{% block profile %}
-    </div>
-    <div id="Sidenav" class="d-flex flex-column flex-shrink-0 sidenav">
-    <div class="mb-auto">
-          <a href="javascript:void(0)" class="closebtn" onclick="toggleNav()">&times;</a>
-          <a href="/topartists">Top Artist</a>
-          <a href="/toptracks">Top Tracks</a>
-          <a href="/lastsaved">Last Saved</a>
-          <a href="/recommend">Make A Recommendation</a>
-    </div>
-{#            {% if user.current_song %}#}
-{#            <div>#}
-{#                <muted>Now Playing:</muted>#}
-{#            <p id="menusong" class="text-1 ms-5 d-block text-white">{{ user.current_song.name }}<br>{{ user.current_song.artist }}</p>#}
-{##}
-{#            <button onclick="skip_song()" class="text-0 d-inline-block ms-5 btn skipbtn">Skip Song</button>#}
-{#            </div>#}
-{#                        {% endif %}#}
-
-        <hr class="bg-dark">
-    <div class="dropdown" id="usermenutoggle">
-      <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" >
-                  <img src="{{user.image}}" class="facepic p-0 " alt="User Image">
-        <strong class="ps-4 pb-2">{{user.name}}</strong>
-      </a>
-      <ul class="dropdown-menu dropdown-menu-dark text-small shadow" id="usermenu" style="display: none; left: 30px;bottom: 70px">
-        <li><a class="dropdown-item text-1" href="/logout">Sign out</a></li>
-      </ul>
-    </div>
+  <hr class="bg-dark" />
+  <div class="dropdown" id="usermenutoggle">
+    <a
+      href="#"
+      class="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
+    >
+      <img src="{{user.image}}" class="facepic p-0" alt="User Image" />
+      <strong class="ps-4 pb-2">{{user.name}}</strong>
+    </a>
+    <ul
+      class="dropdown-menu dropdown-menu-dark text-small shadow"
+      id="usermenu"
+      style="display: none; left: 30px; bottom: 70px"
+    >
+      <li><a class="dropdown-item text-1" href="/logout">Sign out</a></li>
+    </ul>
+  </div>
 </div>
 <!-- Use any element to open the sidenav -->
-<span class="d-block ms-4 mt-2 mb-5" style="font-size:30px;cursor:pointer;color: #1db954;z-index: 2000" onclick="toggleNav()">&#9776; Menu</span>
+<span
+  class="d-block ms-4 mt-2 mb-5"
+  style="font-size: 30px; cursor: pointer; color: #1db954; z-index: 2000"
+  onclick="toggleNav()"
+  >&#9776; Menu</span
+>
 {% endblock %}

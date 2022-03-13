@@ -1,8 +1,11 @@
+import imp
+import re
 from flask import Flask, render_template, request, redirect, session
 from flask_session import Session
 from tempfile import mkdtemp
 import SpotifyApi
 from SpotifyApi import *
+from helpers import *
 
 app = Flask(__name__)
 
@@ -14,11 +17,10 @@ Session(app)
 
 
 @app.route('/')
+@login_required
 def home(error=""):
-    if 'user' in session:
-        session['user'].recently_played()
-        return render_template("home.html", user=session['user'].user, animations=True)
-    return render_template("landing.html", error=error)
+    session['user'].recently_played()
+    return render_template("home.html", user=session['user'].user, animations=True)
 
 
 @app.route('/test')
@@ -34,7 +36,7 @@ def homepage():
         latest_recommendation=None,
         last_saved=None
     )
-    return render_template("profile2.html", headline="Top Artists", user=session['user'], skip=skip())
+    return render_template("profile.html", headline="Top Artists", user=session['user'], skip=skip())
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -53,6 +55,7 @@ def logged_in():
         logged_in = session['user'].get_token()
         if logged_in:
             session['user'].get_user_data()
+            print(session['user'])
             return redirect("/")
         else:
             session.pop('user', None)

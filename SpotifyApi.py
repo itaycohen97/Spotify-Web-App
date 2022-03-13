@@ -1,9 +1,8 @@
-import requests
-import datetime
-import base64
-import SongLibrary
+import requests, datetime, base64,SongLibrary, requests, os
+from helpers import shorten_str
 
-uri = "http://127.0.0.1:5000/loggedin"
+
+uri = os.environ.get('uri')
 
 class User(object):
     def __init__(self, name, user_id, uri, image, top_tracks, current_song, top_artist, latest_recommendation,last_saved):
@@ -19,8 +18,8 @@ class User(object):
 
 
 class SpotifyApi(object):
-    client_id = "3f8c49305a3648c9a96e37d086c2998e"
-    client_secret = "048d33a3b33f4931953d12f30ab6218b"
+    client_id = os.environ.get('client_id')
+    client_secret = os.environ.get('client_secret')
     post_url = "https://accounts.spotify.com/api/token"
     scope = "playlist-modify-public playlist-modify-private user-library-read playlist-read-private user-read-currently-playing user-modify-playback-state user-top-read"
     get_url = "https://accounts.spotify.com/authorize"
@@ -29,6 +28,8 @@ class SpotifyApi(object):
         self.user = User(None, None, None, None, None, None, None, None, None)
         self.code = code
         self.header = None
+    
+
 
     def login_url(self):
         get_params = {
@@ -38,6 +39,7 @@ class SpotifyApi(object):
             "scope": self.scope
         }
         request = requests.get(url=self.get_url, params=get_params)
+        print(request.url)
         return request
 
     def get_client_credentials(self):
@@ -70,7 +72,7 @@ class SpotifyApi(object):
             return False
         data = request.json()
         now = datetime.datetime.now()
-        print(data)
+        # print(data)
         access_token = data['access_token']
         expires_in = data['expires_in']  # seconds
         expires = now + datetime.timedelta(seconds=expires_in)
@@ -89,7 +91,7 @@ class SpotifyApi(object):
         if request.status_code not in range(200, 299):
             print(str(request.status_code) + "is the status code for get user data")
             return False
-        print(request.json())
+        # print(request.json())
         self.user.name = request.json()["display_name"]
         self.user.user_id = request.json()["id"]
         self.user.uri = request.json()["uri"]
@@ -147,7 +149,7 @@ class SpotifyApi(object):
     def skip_to_next_song(self):
         request = requests.post("https://api.spotify.com/v1/me/player/next",
                                 headers=self.header)
-        self.recently_played()
+        return self.recently_played()
         
 
     def get_top_tracks(self):
@@ -283,6 +285,3 @@ class SpotifyApi(object):
         return playlist_url
 
 
-def shorten_str(songname):
-    result = songname.split("(")[0].split("-")[0]
-    return result
