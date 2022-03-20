@@ -39,7 +39,6 @@ class SpotifyApi(object):
             "scope": self.scope
         }
         request = requests.get(url=self.get_url, params=get_params)
-        print(request.url)
         return request
 
     def get_client_credentials(self):

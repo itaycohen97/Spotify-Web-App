@@ -17,6 +17,21 @@ class Song(object):
         print("album:", self.album)
         print("link:", self.link)
         print("id:", self.id)
+    
+    def songToDict(self):
+        return {
+            'name':self.name,
+            'artist':self.artist,
+            'album':self.album,
+            'release_date':self.release_date,
+            'image':self.image,
+            'link':self.link,
+            'id':self.id,
+            'popularity':self.popularity,
+            'uri':self.uri,
+        }
+         
+
 
 
 

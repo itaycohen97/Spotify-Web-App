@@ -1,4 +1,3 @@
-import requests
 from flask import request, render_template
 from functools import wraps
 
@@ -13,10 +12,9 @@ def login_required(f):
 
     http://flask.pocoo.org/docs/1.0/patterns/viewdecorators/
     """
-
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if request.cookies.get('user') == '' or not request.cookies.get('user'):
+        if request.cookies.get('current_session') == '' or not request.cookies.get('current_session'):
             return render_template("landing.html", error='')
         return f(*args, **kwargs)
 
