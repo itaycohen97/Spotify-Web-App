@@ -1,4 +1,4 @@
-{% extends "profile.html" %} {% block body %}
+    {% extends "profile.html" %} {% block body %}
 <h1 class="text-center text-responsive-huge text-focus-in">
   We Are Good To GO!
 </h1>
@@ -19,7 +19,7 @@
   >
 </div>
 
-{% if user['current_song'] %}
+{% if user.current_song %}
 <div class="text-center m-2 text-focus-in-1s">
   <p class="mt-5" id="songname" style="color: #1db954">
     <b>Now Playing:</b><br />{{ user.current_song.name }}<br />{{

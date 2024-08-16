@@ -1,14 +1,17 @@
-from flask import Flask, render_template, request, redirect, make_response
-from flask_session import Session
 from tempfile import mkdtemp
-import json
-from SpotifyApi import *
-from helpers import *
+
+import flask_login
+from flask import Flask, redirect, make_response, session, render_template, request
+from flask_login import LoginManager, login_required, current_user
+from flask_session import Session
+
 from spotify import *
-from functools import wraps
-from datetime import datetime
 
 app = Flask(__name__)
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+
 
 # Configure session to use filesystem (instead of signed cookies)
 app.config["SESSION_FILE_DIR"] = mkdtemp()
@@ -16,29 +19,49 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-def define_user(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        global current_session
-        current_session = json.loads(request.cookies.get('current_session'))
-        is_expired = datetime.strptime(current_session['expires'], '%m/%d/%Y, %H:%M:%S') < datetime.now()
-        if is_expired is True:
-            return redirect('/logout')
-        global user_data
-        try:
-            user_data = json.loads(request.cookies.get('user_data'))
-        except:
-            user_data = get_user_data(current_session["header"])
-        return f(*args, **kwargs)
-    return decorated_function
 
+# def define_user(f):
+#     @wraps(f)
+#     def decorated_function(*args, **kwargs):
+#         if request.cookies.get('user_data') is None:
+#             print("No Cookie found")
+#             return redirect('/logout')
+#         else:
+#             global current_session
+#             current_session = json.loads(request.cookies.get('user_data'))
+#             user_credentials = User.from_cookie(current_session)
+#             if user_credentials.is_expired():
+#                 print("Token Expired")
+#                 return redirect('/logout')
+#             user_data = get_user_data(user_credentials)
+#             print("all good")
+#         return f(*args, **kwargs)
+# 
+#     return decorated_function
+
+@login_manager.user_loader
+def load_user(user_id):
+    # Replace this with your actual user loading logic
+    # For example, loading user data from a database
+    return User(user_id)
+
+
+@login_manager.unauthorized_handler
+def unauthorized():
+    # Handle unauthorized access here
+    # You can return a JSON response, redirect to a login page, or any other desired action
+    print(
+        "unauthorized access, redirecting to login page"
+    )
+    return redirect("/")
 
 @app.route('/')
-@login_required
-@define_user
 def home(error=""):
-    user_data['current_song'] = recently_played(header=current_session['header'])
-    return render_template("home.html", user=user_data, animations=True)
+    if current_user.is_authenticated:
+        # print("user will expire in: " + str(current_user.time_to_expire()))
+        current_user.set_currently_playing(get_currently_playing(current_user.get_headers()))
+        return render_template("home.html", user=current_user, animations=True)
+    return render_template("landing.html", error='')
 
 
 @app.route('/test')
@@ -60,99 +83,91 @@ def homepage():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        return redirect(login_url())
+        return redirect(redirect_to_spotify_url())
     else:
         return redirect("/")
 
 
 @app.route('/loggedin', methods=['GET', 'POST'])
 def logged_in():
-    if request.args.get('code'):
-        get_login_data = get_token(request.args['code'])
-        if get_login_data[0] == True:
-            redirecting = redirect('/')
-            cur_user = get_user_data(get_login_data[1]['header'])
-            redirecting.set_cookie('current_session', json.dumps(get_login_data[1]))
-            redirecting.set_cookie('user_data', json.dumps(cur_user))
-            return redirecting
+    if 'code' in request.args:
+        user = generate_user(request.args['code'])
+        if user:
+            flask_login.login_user(user, remember=False, duration=datetime.timedelta(seconds=user.time_to_expire()), force=False, fresh=True)
+            return redirect('/')
     else:
-        session.pop('user', None)
+        print("something went wrong with the login")
         return home(error="Sorry, Something Went Wrong...")
+
 
 @app.route('/logout')
 def logout():
-    loggedout = redirect("/")
-    loggedout.delete_cookie("current_session")
-    loggedout.delete_cookie("user_data")
-    return loggedout
+    print("logging out")
+    return redirect("/")
 
 
 @app.route('/recommend', methods=['GET', 'POST'])
 @login_required
-@define_user
 def recommend():
     if request.method == 'POST':
-        user_seed = get_artist_seed(header=current_session['header'])
-        songlist = get_recommendation(header=current_session['header'], genres=request.form.get("genres"),
-                                                        popularity=int(request.form.get("popularity")),
-                                                        danceability=float(request.form.get("danceability")),
-                                                        energy=float(request.form.get("energy")), seed_artists=user_seed)
+        user_seed = get_artist_seed(header=current_user.get_headers())
+        songlist = get_recommendation(header=current_user.get_headers(), genres=request.form.get("genres"),
+                                      popularity=int(request.form.get("popularity")),
+                                      danceability=float(request.form.get("danceability")),
+                                      energy=float(request.form.get("energy")), seed_artists=user_seed)
         if songlist:
             tracks_uri = ""
             for item in songlist:
                 if item:
-                  tracks_uri += item.uri
-                  tracks_uri += ","
+                    tracks_uri += item.uri
+                    tracks_uri += ","
             headline = "Here Are Some Songs We Think You'll Like!"
-            result = make_response(render_template("view_songs.html", user=user_data, headline=headline,
-                                    songlist=songlist, playlist_url=True))
+            result = make_response(render_template("view_songs.html", user=current_user, headline=headline,
+                                                   songlist=songlist, playlist_url=True))
             result.set_cookie('tracks_uri', tracks_uri)
             return result
         else:
             headline = "Sorry, Something Went Wrong..."
-            return render_template("home.html", user=user_data, headline=headline)
+            return render_template("home.html", user=current_user, headline=headline)
 
     else:
-        genre = get_genres(header=current_session['header'])
-        return render_template("rec_form.html", user=user_data, genre=genre)
+        genre = get_genres(header=current_user.get_headers())
+        return render_template("rec_form.html", user=current_user, genre=genre)
 
 
 @app.route('/makeplaylist')
 @login_required
-@define_user
 def makeplaylist():
-    data = make_playlist(header=current_session['header'], user_data=user_data, uris=request.cookies.get('tracks_uri'))
+    data = make_playlist(header=current_user.get_headers(), user_data=current_user, uris=request.cookies.get('tracks_uri'))
     headline = "Here Are Some Songs We Think You'll Like!"
     return redirect(data)
 
+
 @app.route('/topartists')
 @login_required
-@define_user
 def topartists():
-    top_artists = get_top_artists(header=current_session['header'])
+    top_artists = get_top_artists(header=current_user.get_headers())
     headline = "Here Are Your Top Artists"
-    return render_template("view_artists.html", user=user_data, headline=headline,
-                            artists=top_artists)
+    return render_template("view_artists.html", user=current_user, headline=headline,
+                           artists=top_artists)
 
 
 @app.route('/toptracks')
 @login_required
-@define_user
 def toptracks():
-    top_tracks = get_top_tracks(header=current_session['header'])
+    top_tracks = get_top_tracks(header=current_user.get_headers())
     headline = "Top Tracks"
-    return render_template("view_songs.html", user=user_data, headline=headline,
-                            songlist=top_tracks)
+    return render_template("view_songs.html", user=current_user, headline=headline,
+                           songlist=top_tracks)
 
 
 @app.route('/lastsaved')
 @login_required
-@define_user
 def last_saved():
-        last_saved = get_last_saved(header=current_session['header'])
-        headline = "Here Are Your Latest Saved Tracks"
-        return render_template("view_songs.html", user=user_data, headline=headline,
-                               songlist=last_saved)
+    last_saved = get_last_saved(header=current_user.get_headers())
+    headline = "Here Are Your Latest Saved Tracks"
+    return render_template("view_songs.html", user=current_user, headline=headline,
+                           songlist=last_saved)
 
 
 @app.errorhandler(500)
@@ -162,6 +177,4 @@ def internal_server_error(e):
 
 
 if __name__ == '__main__':
-    app.run()
-
-
+    app.run(port=5000, debug=True)
