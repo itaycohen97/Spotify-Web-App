@@ -7,3 +7,4 @@ mysql-connector==2.2.9
 mysql-connector-python==8.0.27
 wheel==0.37.0
 yarg==0.1.9
+flask_login==0.6.3
