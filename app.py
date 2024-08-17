@@ -1,23 +1,22 @@
-from tempfile import mkdtemp
-
 import flask_login
-from flask import Flask, redirect, make_response, session, render_template, request
+from flask import Flask, redirect, make_response, render_template, request
 from flask_login import LoginManager, login_required, current_user
-from flask_session import Session
 
 from spotify import *
+
+# from flask_session import Session
 
 app = Flask(__name__)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
 
-
-# Configure session to use filesystem (instead of signed cookies)
-app.config["SESSION_FILE_DIR"] = mkdtemp()
-app.config["SESSION_PERMANENT"] = False
-app.config["SESSION_TYPE"] = "filesystem"
-Session(app)
+#
+# # Configure session to use filesystem (instead of signed cookies)
+# app.config["SESSION_FILE_DIR"] = mkdtemp()
+# app.config["SESSION_PERMANENT"] = False
+# app.config["SESSION_TYPE"] = "filesystem"
+# Session(app)
 
 
 @login_manager.user_loader
