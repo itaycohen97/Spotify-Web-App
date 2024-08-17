@@ -20,25 +20,6 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 
-# def define_user(f):
-#     @wraps(f)
-#     def decorated_function(*args, **kwargs):
-#         if request.cookies.get('user_data') is None:
-#             print("No Cookie found")
-#             return redirect('/logout')
-#         else:
-#             global current_session
-#             current_session = json.loads(request.cookies.get('user_data'))
-#             user_credentials = User.from_cookie(current_session)
-#             if user_credentials.is_expired():
-#                 print("Token Expired")
-#                 return redirect('/logout')
-#             user_data = get_user_data(user_credentials)
-#             print("all good")
-#         return f(*args, **kwargs)
-# 
-#     return decorated_function
-
 @login_manager.user_loader
 def load_user(user_id):
     # Replace this with your actual user loading logic
@@ -63,21 +44,6 @@ def home(error=""):
         return render_template("home.html", user=current_user, animations=True)
     return render_template("landing.html", error='')
 
-
-@app.route('/test')
-def homepage():
-    session['user'] = User(
-        name="Itay Cohen",
-        image="https://i.scdn.co/image/ab6775700000ee859bcdfe103aed2de2e665cb93",
-        user_id=None,
-        uri=None,
-        top_artist=None,
-        top_tracks=None,
-        current_song=None,
-        latest_recommendation=None,
-        last_saved=None
-    )
-    return render_template("profile.html", headline="Top Artists", user=session['user'])
 
 
 @app.route('/login', methods=['GET', 'POST'])
