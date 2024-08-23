@@ -5,6 +5,7 @@ from datetime import datetime
 import requests
 from flask_login import UserMixin
 
+
 # from spotify import get_user_data
 
 
@@ -15,6 +16,8 @@ class User(UserMixin):
         token, expiration = json.loads(id)
         self.token = token
         self.expiration = expiration
+
+        self.user_personal_data = self.get_user_data()
         self.name = None
         self.spotify_id = None
         self.uri = None
@@ -25,8 +28,6 @@ class User(UserMixin):
         self.current_song = None
         self.latest_recommendation = None
         self.last_saved = None
-
-        self.get_user_data()
 
     def is_expired(self):
         return self.expiration < time.time()
@@ -50,19 +51,13 @@ class User(UserMixin):
         }
 
     def get_user_data(self):
+        user = UserData()
         request = requests.get("https://api.spotify.com/v1/me", headers=self.get_headers())
         if request.status_code not in range(200, 299):
             print(str(request.status_code) + "is the status code for get user data")
-            return False
+            return user
         data = request.json()
-        self.name = data["display_name"]
-        self.spotify_id = data["id"]
-        self.uri = data["uri"]
-        self.image = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQOWwtsGvuHl9CxFrQDLG0C-XXU9lpnLIY0jzohdM2I1g1DvjnOo8f1p7v9g7ad26mkXgs&usqp=CAU"
-
-        if request.json()["images"]:
-            self.image = request.json()["images"][0]["url"]
-        return True
+        return user.from_json(data)
 
     def get_id(self):
         try:
@@ -74,13 +69,20 @@ class User(UserMixin):
         self.current_song = song
 
 
+class UserData:
 
-# class User:
-#
-#     def __init__(self, name, image, user_id, uri, top_artist, top_tracks, current_song, latest_recommendation,
-#                  last_saved):
-#         self.name = name
-#         self.image = image
-#         self.user_id = user_id
-#         self.uri = uri
-#
+    def __init__(self, name=None, image=None, user_id=None, uri=None):
+        self.name = name
+        self.image = image
+        self.spotify_id = user_id
+        self.uri = uri
+
+    def from_json(self, data):
+        self.name = data.get("display_name", "No Name")
+        self.spotify_id = data.get("id", "No ID")
+        self.uri = data.get("uri", "No URI")
+        if data["images"]:
+            self.image = data["images"][0]["url"]
+        else:
+            self.image = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQOWwtsGvuHl9CxFrQDLG0C-XXU9lpnLIY0jzohdM2I1g1DvjnOo8f1p7v9g7ad26mkXgs&usqp=CAU"
+        return self

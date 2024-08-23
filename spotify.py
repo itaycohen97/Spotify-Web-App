@@ -43,7 +43,7 @@ def generate_user(code: str):
     request = requests.post(post_url, headers=headers, data=body)
 
     if request.status_code not in range(200, 299):
-        print(f"First Login Failed, Status Code: {request.status_code}" )
+        print(f"First Login Failed, Status Code: {request.status_code}")
         return None
     access_token_header = request.json()
     current_epoch = time.time()
@@ -56,7 +56,7 @@ def generate_user(code: str):
 
     expires_in = datetime.datetime.now() + datetime.timedelta(seconds=access_token_header['expires_in'])
 
-    usr_id = json.dumps([access_token_header['access_token'], int(time.time()+access_token_header['expires_in'])])
+    usr_id = json.dumps([access_token_header['access_token'], int(time.time() + access_token_header['expires_in'])])
     return User(usr_id)
 
 
@@ -84,30 +84,12 @@ def get_currently_playing(header):
     return song
 
 
-# def get_user_data(user_credentials: User):
-#     request = requests.get("https://api.spotify.com/v1/me", headers=user_credentials.get_headers())
-#     if request.status_code not in range(200, 299):
-#         print(str(request.status_code) + "is the status code for get user data")
-#         return False
-#     data = request.json()
-#     # TODO: create new user object
-#     print(data)
-#     cur_user = {
-#         "name": data["display_name"],
-#         "user_id": data["id"],
-#         "uri": data["uri"],
-#         "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQOWwtsGvuHl9CxFrQDLG0C-XXU9lpnLIY0jzohdM2I1g1DvjnOo8f1p7v9g7ad26mkXgs&usqp=CAU"
-#     }
-#     if request.json()["images"]:
-#         cur_user["image"] = request.json()["images"][0]["url"]
-#     return cur_user
-
 
 def get_last_saved(header):
     request = requests.get("https://api.spotify.com/v1/me/tracks",
                            headers=header)
     request_json = request.json()
-    songlist = []
+    song_list = []
     for song in request_json["items"]:
         song = Song(
             name=song['track']['name'],
@@ -120,8 +102,8 @@ def get_last_saved(header):
             id=song['track']['id'],
             uri=None
         )
-        songlist.append(song)
-    return songlist
+        song_list.append(song)
+    return [{'name': 'Last Saved', 'songs': song_list}]
 
 
 def get_top_artists(header):
@@ -143,7 +125,41 @@ def get_top_artists(header):
 
 
 def get_top_tracks(header):
-    request = requests.get("https://api.spotify.com/v1/me/top/tracks?time_range=medium_term&limit=20&offset=0",
+    time_term_map = {"short_term": "Last 4 Weeks", "medium_term": "Last 6 Months", "long_term": "Last 1 Year"}
+    result = []
+    for time_range in time_term_map:
+        request = requests.get(f"https://api.spotify.com/v1/me/top/tracks?time_range={time_range}&limit=20&offset=0",
+                               headers=header)
+        if request.status_code not in range(200, 299):
+            print("Could Not get Top Tracks, Status Code: " + str(request.status_code))
+            return False
+        elif request.status_code == 204:
+            print("No Top Tracks Found")
+            return False
+        elif request.status_code in range(500, 599):
+            print("Server Error, Status Code: " + str(request.status_code))
+            return
+
+        request_json = request.json()
+        song_list = []
+        for song in request_json["items"]:
+            new_song = Song(
+                name=song['name'],
+                album=song['album']['name'],
+                artist=song['album']['artists'][0]['name'],
+                release_date=song['album']['release_date'],
+                image=song['album']['images'][1]['url'],
+                link=song['external_urls']['spotify'],
+                popularity=song['popularity'],
+                id=song['id'],
+                uri=song['uri']
+            )
+            song_list.append(new_song)
+        result.append({'name': time_term_map[time_range], 'songs': song_list})
+    return result
+
+def get_double_top_tracks(header):
+    request = requests.get("https://api.spotify.com/v1/me/top/tracks?time_range=short_term&limit=5&offset=0",
                            headers=header)
     request_json = request.json()
     song_list = []
@@ -160,6 +176,27 @@ def get_top_tracks(header):
             uri=song['uri']
         )
         song_list.append(new_song)
+
+    uri_str = ",".join([song["uri"].split(":")[-1] for song in request_json["items"]])
+
+    request = requests.get(f"https://api.spotify.com/v1/recommendations?limit=15&seed_tracks={uri_str}",
+                           headers=header)
+    request_json = request.json()
+    print(request_json)
+    for song in request_json["tracks"]:
+        new_song = Song(
+            name=song['name'],
+            album=song['album']['name'],
+            artist=song['album']['artists'][0]['name'],
+            release_date=song['album']['release_date'],
+            image=song['album']['images'][1]['url'],
+            link=song['external_urls']['spotify'],
+            popularity=song['popularity'],
+            id=song['id'],
+            uri=song['uri']
+        )
+        song_list.append(new_song)
+
     return song_list
 
 
@@ -228,7 +265,7 @@ def get_genres(header):
 
 
 def make_playlist(header, user_data, uris):
-    request = requests.post(f"https://api.spotify.com/v1/users/{user_data.spotify_id}/playlists",
+    request = requests.post(f"https://api.spotify.com/v1/users/{user_data.user_personal_data.spotify_id}/playlists",
                             headers=header,
                             data="{\"name\":\"Latest Recommendations\",\"description\":\"Based On What You Hear\",\"public\":false}")
     if request.status_code not in range(200, 299):

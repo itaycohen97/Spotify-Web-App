@@ -9,6 +9,23 @@
     <a href="/lastsaved">Last Saved</a>
     <a href="/recommend">Make A Recommendation</a>
   </div>
+    {% if user.current_song %}
+<div class="text-center m-2 text-focus-in-1s">
+  <p class="mt-5" id="songname" style="color: #1db954">
+    <muted>Now Playing:</muted><br />{{ user.current_song.name }}<br />{{
+    user.current_song.artist }}
+  </p>
+  <a
+    ><button
+      id="skip_btn"
+      class="text-0 d-inline-block m-2 btn skipbtn"
+      disabled
+    >
+      Skip Song
+    </button></a
+  >
+</div>
+{% endif %}
   {# {% if user.current_song %}#} {#
   <div>
     #} {# <muted>Now Playing:</muted>#} {#

@@ -15,3 +15,15 @@ function toggleUser() {
 }
 
 document.getElementById("usermenutoggle").addEventListener("click", toggleUser);
+
+
+document.addEventListener("DOMContentLoaded", function() {
+    const playlistSelector = document.getElementById("playlistSelector");
+    const playlists = document.querySelectorAll(".playlist");
+
+    playlistSelector.addEventListener("change", function() {
+        playlists.forEach((playlist, index) => {
+            playlist.style.display = index === parseInt(playlistSelector.value) ? "block" : "none";
+        });
+    });
+});
